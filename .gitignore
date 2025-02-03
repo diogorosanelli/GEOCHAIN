@@ -135,5 +135,5 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-.pytest_cache/
-__pycache__/
+*/.pytest_cache/*
+*/__pycache__/*
