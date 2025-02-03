@@ -2,19 +2,52 @@ import sys
 import os
 import pytest
 import json
+import importlib
 
-# Adiciona o diretório "backend" (localizado na raiz) ao sys.path.
+# Adiciona o diretório "backend" ao sys.path para que o Python encontre o pacote.
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 BACKEND_DIR = os.path.join(ROOT_DIR, 'backend')
 if BACKEND_DIR not in sys.path:
     sys.path.insert(0, BACKEND_DIR)
 
-# Importa a instância do Flask do módulo app (que está em backend/)
-from app import app
+# Importa os módulos de serviços para referência (se necessário para o monkeypatch)
+from backend.services import arcgis, blockchain
 
-# Se você precisar testar também os módulos de services, poderá importar assim:
-# from services.arcgis import get_geographic_data
-# from services.blockchain import register_event_on_blockchain, get_events_from_blockchain
+# Define as funções fake
+def fake_get_geographic_data(lot_id):
+    return {"geoHash": "fakeGeoHash123", "feature": {"attributes": {"objectid": 1}}}
+
+fake_tx_receipt = {"txHash": "0xfake", "status": 1, "blockNumber": 12345}
+def fake_register_event_on_blockchain(lot_id, event_type, geo_hash, details):
+    print("Fake register_event_on_blockchain chamada")
+    return fake_tx_receipt
+
+def fake_get_events_from_blockchain(lot_id):
+    return [{
+        "timestamp": 1630000000,
+        "eventType": "plantio",
+        "geoHash": "fakeGeoHash123",
+        "details": "Plantio realizado com sucesso."
+    }]
+
+# Importa o módulo app e sobrescreve as funções já importadas (no escopo global)
+import backend.app as app_module
+# Força a substituição das funções que o app usa diretamente.
+setattr(app_module, 'get_geographic_data', fake_get_geographic_data)
+setattr(app_module, 'register_event_on_blockchain', fake_register_event_on_blockchain)
+setattr(app_module, 'get_events_from_blockchain', fake_get_events_from_blockchain)
+
+# Se app.py já importou essas funções de services, precisamos sobrescrevê-las também no seu namespace.
+# Por exemplo, se em app.py houver:
+#   from services.arcgis import get_geographic_data
+# então podemos fazer:
+app_module.__dict__['get_geographic_data'] = fake_get_geographic_data
+app_module.__dict__['register_event_on_blockchain'] = fake_register_event_on_blockchain
+app_module.__dict__['get_events_from_blockchain'] = fake_get_events_from_blockchain
+
+# Se necessário, recarregue o módulo para garantir que as alterações sejam aplicadas.
+importlib.reload(app_module)
+app = app_module.app
 
 @pytest.fixture
 def client():
@@ -30,30 +63,12 @@ def test_index(client):
     assert response.status_code == 200
     assert b"GeoChain Backend is Running!" in response.data
 
-def test_register_and_get_event(client, monkeypatch):
+def test_register_and_get_event(client):
     """
     Testa o fluxo de registro e recuperação de um evento.
-    Utiliza monkeypatch para simular as funções dos serviços.
+    Como as funções de serviço foram substituídas no escopo global do módulo app,
+    o endpoint /register_event deverá retornar os valores simulados.
     """
-    # Simula a função get_geographic_data definida em backend/services/arcgis.py
-    def fake_get_geographic_data(lot_id):
-        return {"geoHash": "fakeGeoHash123", "feature": {"attributes": {"objectid": 1}}}
-    monkeypatch.setattr("backend.services.arcgis.get_geographic_data", fake_get_geographic_data)
-
-    # Simula as funções do módulo blockchain
-    fake_tx_receipt = {"txHash": "0xfake", "status": 1, "blockNumber": 12345}
-    def fake_register_event_on_blockchain(lot_id, event_type, geo_hash, details):
-        return fake_tx_receipt
-    def fake_get_events_from_blockchain(lot_id):
-        return [{
-            "timestamp": 1630000000,
-            "eventType": "plantio",
-            "geoHash": "fakeGeoHash123",
-            "details": "Plantio realizado com sucesso."
-        }]
-    monkeypatch.setattr("backend.services.blockchain.register_event_on_blockchain", fake_register_event_on_blockchain)
-    monkeypatch.setattr("backend.services.blockchain.get_events_from_blockchain", fake_get_events_from_blockchain)
-
     # Testa o endpoint /register_event
     payload = {
         "lotId": 1,
@@ -64,6 +79,7 @@ def test_register_and_get_event(client, monkeypatch):
     data = json.loads(response.data)
     assert response.status_code == 201
     assert data["message"] == "Evento registrado com sucesso!"
+    # Agora, como a função fake foi aplicada, o hash retornado deve ser "0xfake"
     assert data["transaction"]["txHash"] == "0xfake"
 
     # Testa o endpoint /get_events/1
