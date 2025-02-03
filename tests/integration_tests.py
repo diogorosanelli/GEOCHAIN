@@ -1,11 +1,16 @@
 # tests/integration_tests.py
 import sys
 import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from backend.app import app
-
 import json
 import pytest
+
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+BACKEND_DIR = os.path.join(ROOT_DIR, 'backend')
+sys.path.insert(0, BACKEND_DIR)
+
+from app import app  # Importa a instância Flask do app.py
+from services.arcgis import get_geographic_data
+from services.blockchain import register_event_on_blockchain, get_events_from_blockchain
 
 # Configurar o cliente de teste do Flask
 @pytest.fixture
