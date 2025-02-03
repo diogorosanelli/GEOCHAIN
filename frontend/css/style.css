@@ -1,0 +1,87 @@
+/* css/style.css */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
+/* Estilo básico para o body e fontes */
+body {
+  margin: 0;
+  font-family: "Roboto Condensed", serif;
+  background-color: #f4f4f4;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Logo */
+.logo {
+  position: absolute;
+  height: 150px;
+  margin-right: 15px;
+  bottom: 20px;
+  right: -10px;
+  z-index: 1000;
+}
+
+/* Estilo do cabeçalho */
+header {
+  background-color: #214448;
+  color: #dce6dc;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  font-family: "Roboto Condensed", serif;
+  font-size: 14pt;
+}
+
+/* Container do mapa e sidebar */
+#mapContainer {
+  flex: 1;
+  position: relative;
+}
+
+/* Estilo da sidebar para exibição dos detalhes */
+#sidebar {
+  font-family: "Roboto Condensed", serif;
+  position: absolute;
+  top: 100px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 15px;
+  border-radius: 4px;
+  width: 300px;
+  max-height: 80%;
+  overflow-y: auto;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+#sidebar h2 {
+  margin-top: 0;
+  font-size: 1.2em;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 5px;
+}
+
+/* Customização do título do popup */
+.esri-popup__title {
+  background-color: #dce6dc !important; /* Altere para a cor desejada */
+  color: #000000 !important; /* Cor do texto */
+  padding: 10px;
+  font-size: 1.1em;
+  border-radius: 4px 4px 0 0; /* Arredonda apenas os cantos superiores, se desejar */
+}
+
+/* Caso seja necessário personalizar também a área de header */
+.esri-popup__header {
+  background-color: #e6e2dc !important;
+  border-bottom: 2px solid #000000; /* Opcional: separador */
+}
+
+/* Responsividade para telas menores */
+@media (max-width: 768px) {
+  #sidebar {
+    width: 90%;
+    right: 5%;
+    top: auto;
+    bottom: 10px;
+  }
+}

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GeoChain</title>
+  <!-- Link para o CSS principal -->
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Link para o ArcGIS API for JavaScript -->
+  <link rel="stylesheet" href="https://js.arcgis.com/4.24/esri/themes/light/main.css">
+  <script src="https://js.arcgis.com/4.24/"></script>
+</head>
+<body>
+  <!-- Cabeçalho com título -->
+  <header>    
+    <h3>RASTREABILIDADE DE COMMODITIES AGRÍCOLAS</h3>
+  </header>
+
+  <!-- Logo -->
+  <img src="assets/logo.png" alt="Logo GeoChain" class="logo">
+
+  <!-- Container principal onde o mapa será renderizado -->
+  <div id="mapContainer"></div>
+
+  <!-- Container para filtros e informações dos eventos -->
+  <div id="sidebar">
+    <h2>Detalhes do Evento</h2>
+    <div id="eventDetails">
+      <!-- Os detalhes dos eventos serão carregados aqui via JS -->
+    </div>
+  </div>
+
+  <!-- Inclusão do script principal da aplicação -->
+  <script src="js/app.js"></script>
+</body>
+</html>
