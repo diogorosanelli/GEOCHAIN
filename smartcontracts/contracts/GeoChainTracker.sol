@@ -14,7 +14,7 @@ contract GeoChainTracker {
         string eventType;    // Tipo de evento (ex.: "plantio", "colheita", "transporte")
         string geoHash;      // Identificador ou hash da localização geoespacial
         string details;      // Detalhes adicionais do evento
-    }
+    } 
 
     // Mapeamento para associar um lote (lotId) a um array de eventos
     mapping(uint256 => Event[]) private lotEvents;
