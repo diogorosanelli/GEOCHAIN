@@ -13,7 +13,7 @@ A solução GeoChain foi desenvolvida com os seguintes componentes:
 
 ## Estrutura do Projeto
 
-GEOCHAIN/ 
+`GEOCHAIN/ 
 ├── README.md 
 ├── backend/ 
 │ ├── app.py 
@@ -42,7 +42,7 @@ GEOCHAIN/
 │ └── user_manual.md
 └── tests/ 
     ├── test_backend.py 
-    └── integration_tests.md
+    └── integration_tests.md`
 
 
 ## Requisitos
