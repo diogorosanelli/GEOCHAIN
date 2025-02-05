@@ -22,7 +22,7 @@ GEOCHAIN/
 │ ├── blockchain.py 
 │ ├── config.py 
 │ └── requirements.txt 
-├── blockchain/ 
+├── smartcontracts/ 
 │ ├── contracts/ 
 │ │ └── GeoChainTracker.sol 
 │ ├── migrations/ 
