@@ -1,3 +1,6 @@
+import sys
+sys.path.insert(0, "/mnt/d/PESSOAL/2025/250131-GEOCHAIN/source/GeoChain")
+
 import pytest
 import json
 from backend.app import app  # Certifique-se de que sua aplicação Flask está exposta como "app"

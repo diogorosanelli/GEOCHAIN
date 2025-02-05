@@ -1,4 +1,7 @@
 # tests/test_integration.py
+import sys
+sys.path.insert(0, "/mnt/d/PESSOAL/2025/250131-GEOCHAIN/source/GeoChain")
+
 import os
 import pytest
 import requests
