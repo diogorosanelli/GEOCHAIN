@@ -1,6 +1,6 @@
 # tests/test_backend.py
 import pytest
-from backend.app import app  # importe a aplicação Flask
+from backend.app import app # Importa a instância do Flask
 
 @pytest.fixture
 def client():
