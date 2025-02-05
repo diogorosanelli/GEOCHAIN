@@ -71,9 +71,9 @@ GEOCHAIN/
 
 ### Blockchain (Smart Contracts)
 
-1. Navegue até a pasta `blockchain/`:
+1. Navegue até a pasta `smartcontracts/`:
     ```bash
-    cd blockchain
+    cd smartcontracts
     ```
 2. Instale as dependências do Node.js:
     ```bash
