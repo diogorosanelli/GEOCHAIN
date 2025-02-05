@@ -1,4 +1,4 @@
-4const GeoChainTracker = artifacts.require("GeoChainTracker");
+const GeoChainTracker = artifacts.require("GeoChainTracker");
 
 contract("GeoChainTracker", accounts => {
   const lotId = 1;
