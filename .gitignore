@@ -4,6 +4,7 @@ Thumbs.db
 
 # Artefatos do Python
 __pycache__/
+.pytest_cache/
 *.py[cod]
 *$py.class
 
