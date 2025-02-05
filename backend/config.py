@@ -10,9 +10,9 @@ ARCGIS_BASE_URL = "https://saopaulo.img.com.br/innovaserver/rest/services/Hosted
 # Configurações da rede Ethereum
 ETH_NODE_URL = "http://127.0.0.1:7545"
 CONTRACT_ABI_PATH = "/mnt/d/PESSOAL/2025/250131-GEOCHAIN/source/GeoChain/blockchain/build/contracts/GeoChainTracker.json"  # Certifique-se de gerar e salvar o ABI
-CONTRACT_ADDRESS = "0x2c41BA0Ec2674626FfBD9611cd1e52D0F99b6c98"
-ETH_ACCOUNT = "0xe7394dE96a2F17D79de7D9063Ee9155B5B2162e5"
-ETH_PRIVATE_KEY = "0xf9f9981bae86d59f20eb512d7c1b2a90317d9d105f5f5e8861674cd85d8baf23"
+CONTRACT_ADDRESS = "0xc31d60439D1E188a29E1511928740fEbB5a983fb"
+ETH_ACCOUNT = "0x065488A62018c0eeb961A5A50a45CF26Cdb57d4F"
+ETH_PRIVATE_KEY = "0xd10e6c56ae96a4265e99d7cf9931e23e08ba2e6a63c15d5fd2ec95feea6a4ebd"
 
 # Parâmetros de transação
 GAS_LIMIT = 3000000

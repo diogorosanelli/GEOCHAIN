@@ -1,9 +1,13 @@
 # app.py
-from flask import Flask, request, jsonify
+import os
+from dotenv import load_dotenv
 
-import config
+from flask import Flask, request, jsonify
 from services.arcgis import get_geographic_data
 from services.blockchain import register_event_on_blockchain, get_events_from_blockchain
+
+load_dotenv()
+PORT = os.getenv("PORT", "5000")
 
 app = Flask(__name__)
 
@@ -48,4 +52,4 @@ def get_events(lot_id):
     return jsonify(events), 200
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=config.PORT, debug=True)
+    app.run(host='0.0.0.0', port=PORT, debug=True)

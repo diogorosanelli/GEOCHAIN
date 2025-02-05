@@ -1,24 +1,34 @@
 import json
+import os
+from dotenv import load_dotenv
 from web3 import Web3
-import config
+
+load_dotenv()
+ETH_NODE_URL = os.getenv("ETH_NODE_URL")
+CONTRACT_ABI_PATH = os.getenv("CONTRACT_ABI_PATH")
+CONTRACT_ADDRESS = os.getenv("CONTRACT_ADDRESS")
+ETH_ACCOUNT = os.getenv("ETH_ACCOUNT")
+ETH_PRIVATE_KEY = os.getenv("ETH_PRIVATE_KEY")
+GAS_LIMIT = os.getenv("GAS_LIMIT")
+GAS_PRICE = os.getenv("GAS_PRICE")
 
 def initialize_web3():
-    print("Conectando ao nó Ethereum:", config.ETH_NODE_URL)
-    w3 = Web3(Web3.HTTPProvider(config.ETH_NODE_URL))
+    print("Conectando ao nó Ethereum:", ETH_NODE_URL)
+    w3 = Web3(Web3.HTTPProvider(ETH_NODE_URL))
     if not w3.is_connected():
         raise Exception("Falha ao conectar ao nó Ethereum. Verifique ETH_NODE_URL.")
     return w3
 
 def load_contract(w3):
-    print("Lendo o arquivo ABI de:", config.CONTRACT_ABI_PATH)
-    with open(config.CONTRACT_ABI_PATH, 'r') as abi_file:
+    print("Lendo o arquivo ABI de:", CONTRACT_ABI_PATH)
+    with open(CONTRACT_ABI_PATH, 'r') as abi_file:
         contract_json = json.load(abi_file)
     # Certifique-se de usar somente o array de ABI
     contract_abi = contract_json["abi"]
     print("Arquivo ABI carregado com sucesso. Número de entradas:", len(contract_abi))
     
     # Converter o endereço do contrato para o formato checksum
-    contract_address = w3.to_checksum_address(config.CONTRACT_ADDRESS)
+    contract_address = w3.to_checksum_address(CONTRACT_ADDRESS)
     print("Instanciando o contrato no endereço:", contract_address)
     
     contract = w3.eth.contract(address=contract_address, abi=contract_abi)
@@ -29,8 +39,8 @@ def register_event_on_blockchain(lot_id, event_type, geo_hash, details):
     try:
         w3 = initialize_web3()
         contract = load_contract(w3)
-        account = config.ETH_ACCOUNT
-        private_key = config.ETH_PRIVATE_KEY
+        account = ETH_ACCOUNT
+        private_key = ETH_PRIVATE_KEY
 
         # Obter nonce
         nonce = w3.eth.get_transaction_count(account, 'latest')
@@ -38,8 +48,8 @@ def register_event_on_blockchain(lot_id, event_type, geo_hash, details):
         tx_params = {
             'from': account,
             'nonce': nonce,
-            'gas': config.GAS_LIMIT,
-            'gasPrice': w3.to_wei(config.GAS_PRICE, 'gwei')
+            'gas': GAS_LIMIT,
+            'gasPrice': w3.to_wei(GAS_PRICE, 'gwei')
         }
 
         # Tente construir a transação usando o método buildTransaction

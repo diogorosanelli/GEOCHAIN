@@ -1,14 +1,13 @@
 # tests/test_blockchain.py
+import sys
+sys.path.insert(0, "/mnt/d/PESSOAL/2025/250131-GEOCHAIN/source/GeoChain")
+
 import json
 import os
 import pytest
 from web3 import Web3
 
-# Constantes fornecidas
-ETH_NODE_URL = "http://127.0.0.1:7545"
-CONTRACT_ABI_PATH = "/mnt/d/PESSOAL/2025/250131-GEOCHAIN/source/GeoChain/blockchain/build/contracts/GeoChainTracker.json"
-CONTRACT_ADDRESS = "0x2c41BA0Ec2674626FfBD9611cd1e52D0F99b6c98"
-ETH_ACCOUNT = "0xe7394dE96a2F17D79de7D9063Ee9155B5B2162e5"
+from backend.config import ETH_NODE_URL, CONTRACT_ABI_PATH, CONTRACT_ADDRESS, ETH_ACCOUNT
 
 @pytest.fixture(scope="module")
 def w3():

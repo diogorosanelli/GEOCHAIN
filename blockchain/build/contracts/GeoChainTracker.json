@@ -6870,10 +6870,22 @@
       "links": {},
       "address": "0x2c41BA0Ec2674626FfBD9611cd1e52D0F99b6c98",
       "transactionHash": "0x33a6f950b2dfc5b5e9041a2e0d69d5b6287e5605841e26ec95e87861cb2e18ff"
+    },
+    "1738628126512": {
+      "events": {},
+      "links": {},
+      "address": "0x285C73Ae2A23f11bd0D0Edf27247dB1CD2aFA6f3",
+      "transactionHash": "0x1b85bc9fb12f362a21bdeb4fb5de68950531f919f9b5bf0402e7c4e324e4fb3f"
+    },
+    "1738717659380": {
+      "events": {},
+      "links": {},
+      "address": "0xc31d60439D1E188a29E1511928740fEbB5a983fb",
+      "transactionHash": "0x31f8b87301b330e329246ed883bfb7d6223c56e0e51858a464746030c8b10cee"
     }
   },
   "schemaVersion": "3.4.16",
-  "updatedAt": "2025-02-03T08:54:45.471Z",
+  "updatedAt": "2025-02-05T01:08:41.107Z",
   "networkType": "ethereum",
   "devdoc": {
     "details": "Contrato para registrar eventos de rastreabilidade de commodities agrícolas. Cada evento é associado a um lote (lotId) e contém informações como timestamp, tipo do evento, identificador geográfico (geoHash) e detalhes adicionais.",

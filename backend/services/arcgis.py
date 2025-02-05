@@ -1,6 +1,11 @@
 # arcgis_service.py
 import requests
-import config
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+ARCGIS_BASE_URL = os.getenv("ARCGIS_BASE_URL")
+ARCGIS_TOKEN = os.getenv("ARCGIS_TOKEN")
 
 def get_geographic_data(lot_id):
     """
@@ -11,7 +16,7 @@ def get_geographic_data(lot_id):
     """
     # Exemplo de URL e parâmetros para consulta ao serviço ArcGIS Online
     # Essa URL e parâmetros devem ser adaptados conforme a API utilizada.
-    arcgis_url = f"{config.ARCGIS_BASE_URL}/query"
+    arcgis_url = f"{ARCGIS_BASE_URL}/query"
     params = {
         "where": f"objectid={lot_id}",
         "outFields": "objectid,shape,attributes",
