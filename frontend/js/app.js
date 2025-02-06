@@ -11,6 +11,9 @@ require([
   "esri/widgets/LayerList"
 ], function(Map, MapView, TileLayer, FeatureLayer, Expand, Legend, LayerList) {
 
+  const activeGUID = -1; // OID do evento ativo (-1 para nenhum evento ativo)
+  const activeEvents = []; // Lista de eventos ativos
+
   // Criação do mapa base
   const map = new Map({
     basemap: "dark-gray-vector" // ou "streets", "satellite" conforme a necessidade
@@ -30,7 +33,8 @@ require([
     url: "https://saopaulo.img.com.br/innovaserver/rest/services/Hosted/SJC/FeatureServer/7",
     outFields: ["*"],
     opacity: 0.75,
-    visible: true
+    visible: true,
+    popupEnabled: false
   });
 
   const lyrSJCImoveisCAR = new FeatureLayer({
@@ -42,38 +46,6 @@ require([
   });
 
   map.addMany([lyrSJCImoveisCAR, lyrSJCLimiteMunicipal]);
-
-  // Exemplo: Adicionando uma camada de eventos (pode ser uma FeatureLayer que consome dados do backend)
-  // const eventsLayer = new FeatureLayer({
-  //   url: "https://<seu-backend-url>/arcgis/rest/services/EventLayer/FeatureServer/0",
-  //   outFields: ["*"],
-  //   popupTemplate: {  // Configuração do pop-up para exibir detalhes do evento
-  //     title: "Evento: {eventType}",
-  //     content: [
-  //       {
-  //         type: "fields",
-  //         fieldInfos: [
-  //           { fieldName: "timestamp", label: "Data/Hora" },
-  //           { fieldName: "geoHash", label: "Localização" },
-  //           { fieldName: "details", label: "Detalhes" }
-  //         ]
-  //       }
-  //     ]
-  //   }
-  // });
-
-  // Adiciona a camada ao mapa
-  // map.add(eventsLayer);
-
-  // Adiciona um widget de legenda
-  // const legend = new Legend({
-  //   view: view
-  // });
-  // const legendExpand = new Expand({
-  //   view: view,
-  //   content: legend
-  // });
-  // view.ui.add(legendExpand, "bottom-left");
 
   // Adiciona o widget LayerList (Tabela de Conteúdo)
   const layerList = new LayerList({
@@ -103,14 +75,16 @@ require([
       const results = response.results;
       if (results.length) {
         const graphic = results.filter(result => result.graphic.layer === lyrSJCImoveisCAR)[0].graphic;
+        activeGUID = graphic.attributes.globalid;
         // Exibir os detalhes do evento na sidebar
         document.getElementById("eventDetails").innerHTML = `
-          <p><strong>Código Imóvel:</strong> ${graphic.attributes.cod_imovel}</p>
-          <p><strong>Status:</strong> ${(graphic.attributes.ind_status === 'AT') ? '<span style="background-color:#0F0;font-weight:bold;">ATIVO</span>' : (graphic.attributes.ind_status === 'PE') ? '<span style="background-color:#f88e02;font-weight:bold;">PENDENTE</span>' : (graphic.attributes.ind_status === 'SU') ? '<span style="background-color:#fc0000;font-weight:bold;">SUSPENSO</span>' : '<span style="background-color:#CCCCCC;font-weight:bold;">CANCELADO</span>'}</p>
-          <p><strong>Tipo:</strong> ${(graphic.attributes.eventtype === undefined ? '-' : graphic.attributes.eventtype)}</p>
+          <p><strong>Código do Imóvel:</strong> ${graphic.attributes.cod_imovel}</p>
+          <p><strong>Situação CAR:</strong> ${(graphic.attributes.ind_status === 'AT') ? '<span style="background-color:#0F0;font-weight:bold;">ATIVO</span>' : (graphic.attributes.ind_status === 'PE') ? '<span style="background-color:#f88e02;font-weight:bold;">PENDENTE</span>' : (graphic.attributes.ind_status === 'SU') ? '<span style="background-color:#fc0000;font-weight:bold;">SUSPENSO</span>' : '<span style="background-color:#CCCCCC;font-weight:bold;">CANCELADO</span>'}</p>
+          <hr>
+          <p><strong>Tipo de Evento:</strong> ${(graphic.attributes.eventtype === undefined ? '-' : graphic.attributes.eventtype)}</p>
           <p><strong>Data/Hora:</strong> ${new Date(graphic.attributes.timestamp * 1000).toLocaleString()}</p>
-          <p><strong>Localização (GeoHash):</strong> ${(graphic.attributes.geohash === undefined) ? '-' : graphic.attributes.geohash}</p>
           <p><strong>Detalhes:</strong> ${(graphic.attributes.details === undefined) ? '-' : graphic.attributes.details}</p>
+          <p><strong>GeoHash:</strong> ${(graphic.attributes.geohash === undefined) ? '-' : graphic.attributes.geohash}</p>
         `;
       }
     });
@@ -120,16 +94,16 @@ require([
   // Exemplo de chamada com fetch (ajuste conforme a necessidade):
   async function fetchEvents() {
     try {
-      const response = await fetch("http://localhost:5000/api/event/list/2803");
-      const data = await response.json();
+      const response = await fetch(`http://localhost:5000/api/event/list/${activeGUID}`);
+      activeEvents = await response.json();
       // Aqui você pode atualizar a camada ou criar gráficos dinâmicos com os dados recebidos.
-      console.log("Eventos do lote:", data);
+      console.log("Eventos do lote:", activeEvents);
     } catch (error) {
       console.error("Erro ao buscar eventos:", error);
     }
   }
 
   // Chamada periódica para atualizar os eventos
-  setInterval(fetchEvents, 60000); // Atualiza a cada 60 segundos
+  setInterval(fetchEvents, 5 * 60 * 1000); // Atualiza a cada 60 segundos
 
 });

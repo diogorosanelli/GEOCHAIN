@@ -7,10 +7,10 @@ load_dotenv()
 ARCGIS_BASE_URL = os.getenv("ARCGIS_BASE_URL")
 ARCGIS_TOKEN = os.getenv("ARCGIS_TOKEN")
 
-def get_geographic_data(oid):
+def get_geographic_data(globalid):
     """
     Consulta o serviço ArcGIS Online para recuperar dados geográficos
-    relacionados ao lote identificado por oid.
+    relacionados ao lote identificado por globalid.
     
     Retorna um dicionário com os dados processados.
     """
@@ -18,8 +18,8 @@ def get_geographic_data(oid):
     # Essa URL e parâmetros devem ser adaptados conforme a API utilizada.
     arcgis_url = f"{ARCGIS_BASE_URL}/query"
     params = {
-        "where": f"objectid={oid}",
-        "outFields": "objectid,shape,attributes",
+        "where": f"globalid={globalid}",
+        "outFields": "globalid,shape,attributes",
         "f": "json",
         # "token": config.ARCGIS_TOKEN
     }
@@ -30,8 +30,8 @@ def get_geographic_data(oid):
         # Para fins de prova de conceito, podemos gerar um hash simples a partir dos dados.
         if data.get("features"):
             feature = data["features"][0]
-            # Exemplo: utilizar o objectid como "geoHash"
-            geo_hash = str(feature.get("attributes", {}).get("objectid", "NA"))
+            # Exemplo: utilizar o globalid como "geoHash"
+            geo_hash = str(feature.get("attributes", {}).get("globalid", "NA"))
             return {"geoHash": geo_hash, "feature": feature}
     # Em caso de erro, retornar valor padrão
     return {"geoHash": "default", "feature": None}

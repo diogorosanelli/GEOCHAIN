@@ -35,7 +35,7 @@ def load_contract(w3):
     print("Contrato instanciado com sucesso!")
     return contract
 
-def register_event_on_blockchain(oid, event_type, geo_hash, details):
+def register_event_on_blockchain(globalid, event_type, geo_hash, details):
     try:
         w3 = initialize_web3()
         contract = load_contract(w3)
@@ -54,11 +54,11 @@ def register_event_on_blockchain(oid, event_type, geo_hash, details):
 
         # Tente construir a transação usando o método buildTransaction
         try:
-            tx = contract.functions.registerEvent(oid, event_type, geo_hash, details).buildTransaction(tx_params)
+            tx = contract.functions.registerEvent(globalid, event_type, geo_hash, details).buildTransaction(tx_params)
         except AttributeError as e:
             # Se buildTransaction não estiver disponível, tente build_transaction
             print("buildTransaction não encontrado, tentando build_transaction...")
-            tx = contract.functions.registerEvent(oid, event_type, geo_hash, details).build_transaction(tx_params)
+            tx = contract.functions.registerEvent(globalid, event_type, geo_hash, details).build_transaction(tx_params)
 
         print("Transação construída com sucesso:", tx)
         
@@ -80,11 +80,11 @@ def register_event_on_blockchain(oid, event_type, geo_hash, details):
         print("Erro ao registrar o evento na blockchain:", str(e))
         raise
 
-def get_events_from_blockchain(oid):
+def get_events_from_blockchain(globalid):
     try:
         w3 = initialize_web3()
         contract = load_contract(w3)
-        events = contract.functions.getEvents(oid).call()
+        events = contract.functions.getEvents(globalid).call()
         # Converter os eventos para um formato Python (lista de dicionários)
         formatted_events = []
         for event in events:
