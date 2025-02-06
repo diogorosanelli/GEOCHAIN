@@ -27,10 +27,10 @@ def contract(w3):
     return w3.eth.contract(address=CONTRACT_ADDRESS, abi=abi)
 
 def test_register_and_get_events(contract, w3):
-    lot_id = 1  # Identificador do lote para o teste
+    OID = 1  # Identificador do lote para o teste
 
     # Consulta os eventos já registrados para o lote
-    initial_events = contract.functions.getEvents(lot_id).call()
+    initial_events = contract.functions.getEvents(OID).call()
     initial_count = len(initial_events)
 
     # Dados do evento a ser registrado
@@ -40,7 +40,7 @@ def test_register_and_get_events(contract, w3):
 
     # Envia a transação utilizando o método transact()
     tx_hash = contract.functions.registerEvent(
-        lot_id,
+        OID,
         event_type,
         geo_hash,
         details
@@ -57,7 +57,7 @@ def test_register_and_get_events(contract, w3):
     receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
 
     # Recupera novamente os eventos para o mesmo lote
-    updated_events = contract.functions.getEvents(lot_id).call()
+    updated_events = contract.functions.getEvents(OID).call()
     updated_count = len(updated_events)
 
     # Verifica se o número de eventos aumentou em 1

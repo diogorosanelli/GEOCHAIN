@@ -101,16 +101,15 @@ require([
   view.on("click", function(event) {
     view.hitTest(event).then(function(response) {
       const results = response.results;
-      console.log(results)
       if (results.length) {
         const graphic = results.filter(result => result.graphic.layer === lyrSJCImoveisCAR)[0].graphic;
         // Exibir os detalhes do evento na sidebar
         document.getElementById("eventDetails").innerHTML = `
           <p><strong>Código Imóvel:</strong> ${graphic.attributes.cod_imovel}</p>
           <p><strong>Status:</strong> ${(graphic.attributes.ind_status === 'AT') ? '<span style="background-color:#0F0;font-weight:bold;">ATIVO</span>' : (graphic.attributes.ind_status === 'PE') ? '<span style="background-color:#f88e02;font-weight:bold;">PENDENTE</span>' : (graphic.attributes.ind_status === 'SU') ? '<span style="background-color:#fc0000;font-weight:bold;">SUSPENSO</span>' : '<span style="background-color:#CCCCCC;font-weight:bold;">CANCELADO</span>'}</p>
-          <p><strong>Tipo:</strong> ${(graphic.attributes.eventType === undefined ? '-' : graphic.attributes.eventType)}</p>
+          <p><strong>Tipo:</strong> ${(graphic.attributes.eventtype === undefined ? '-' : graphic.attributes.eventtype)}</p>
           <p><strong>Data/Hora:</strong> ${new Date(graphic.attributes.timestamp * 1000).toLocaleString()}</p>
-          <p><strong>Localização (GeoHash):</strong> ${(graphic.attributes.geoHash === undefined) ? '-' : graphic.attributes.geoHash}</p>
+          <p><strong>Localização (GeoHash):</strong> ${(graphic.attributes.geohash === undefined) ? '-' : graphic.attributes.geohash}</p>
           <p><strong>Detalhes:</strong> ${(graphic.attributes.details === undefined) ? '-' : graphic.attributes.details}</p>
         `;
       }
@@ -121,7 +120,7 @@ require([
   // Exemplo de chamada com fetch (ajuste conforme a necessidade):
   async function fetchEvents() {
     try {
-      const response = await fetch("https://<seu-backend-url>/get_events/1");
+      const response = await fetch("http://localhost:5000/api/event/list/2803");
       const data = await response.json();
       // Aqui você pode atualizar a camada ou criar gráficos dinâmicos com os dados recebidos.
       console.log("Eventos do lote:", data);

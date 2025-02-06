@@ -7,10 +7,10 @@ load_dotenv()
 ARCGIS_BASE_URL = os.getenv("ARCGIS_BASE_URL")
 ARCGIS_TOKEN = os.getenv("ARCGIS_TOKEN")
 
-def get_geographic_data(lot_id):
+def get_geographic_data(oid):
     """
     Consulta o serviço ArcGIS Online para recuperar dados geográficos
-    relacionados ao lote identificado por lot_id.
+    relacionados ao lote identificado por oid.
     
     Retorna um dicionário com os dados processados.
     """
@@ -18,7 +18,7 @@ def get_geographic_data(lot_id):
     # Essa URL e parâmetros devem ser adaptados conforme a API utilizada.
     arcgis_url = f"{ARCGIS_BASE_URL}/query"
     params = {
-        "where": f"objectid={lot_id}",
+        "where": f"objectid={oid}",
         "outFields": "objectid,shape,attributes",
         "f": "json",
         # "token": config.ARCGIS_TOKEN
