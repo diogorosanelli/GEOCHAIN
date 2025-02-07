@@ -158,6 +158,7 @@ require([
           activeEvents = await response.json()
           console.log("Eventos do lote:", activeEvents);
           // Aqui você pode atualizar a camada ou criar gráficos dinâmicos com os dados recebidos.
+          return activeEvents;
         })
         .catch(error => {
           console.error("Erro ao buscar eventos:", error);
