@@ -149,20 +149,19 @@ require([
   // Função para consumir a API REST do backend e atualizar a camada de eventos
   // Exemplo de chamada com fetch (ajuste conforme a necessidade):
   async function fetchEvents() {
-    try {
-      if(activeGUID != -1) {
-        const response = await fetch(`http://localhost:5000/api/event/list/${activeGUID}`, { mode: 'no-cors' })
-        if (!response.ok) {
-          throw new Error(`Erro ao buscar eventos: ${response.statusText}`);
-        }
-
-        activeEvents = await response.json()
-        console.log("Eventos do lote:", activeEvents);
-
-        // Aqui você pode atualizar a camada ou criar gráficos dinâmicos com os dados recebidos.
-      }  
-    } catch (error) {
-      console.error("Erro ao buscar eventos:", error);
+    if(activeGUID != -1) {
+      fetch(`http://localhost:5000/api/event/list/${activeGUID}`, { mode: 'no-cors' })
+        .then(async response => {
+          if (!response.ok) {
+            throw new Error(`Erro ao buscar eventos: ${response.statusText}`);
+          }
+          activeEvents = await response.json()
+          console.log("Eventos do lote:", activeEvents);
+          // Aqui você pode atualizar a camada ou criar gráficos dinâmicos com os dados recebidos.
+        })
+        .catch(error => {
+          console.error("Erro ao buscar eventos:", error);
+        });
     }
   }
 });
