@@ -76,72 +76,71 @@ require([
 
   // Função para carregar detalhes do evento ao clicar em um marcador
   view.on("click", function(event) {
-    view.hitTest(event).then(function(response) {
+    view.hitTest(event).then(async function(response) {
       const results = response.results;
       if (results.length) {
         const graphic = results.filter(result => result.graphic.layer === lyrSJCImoveisCAR)[0].graphic;
         activeGUID = graphic.attributes.globalid.replace("{", "").replace("}", "");
         console.log("Imóvel Ativo Selecionado:", activeGUID);
 
-        fetchEvents().then(() => {
-          // Criar área fixa para os atributos principais
-          let eventDetailsHTML = `
-            <div id="fixedAttributes">
-              <p><strong>GeoHash:</strong> ${graphic.attributes.globalid}</p>
-              <p><strong>Código do Imóvel:</strong> ${graphic.attributes.cod_imovel}</p>
-              <p><strong>Situação CAR:</strong> 
-                  ${(graphic.attributes.ind_status === 'AT') ? '<span style="background-color:#0F0;font-weight:bold;">ATIVO</span>' : 
-                  (graphic.attributes.ind_status === 'PE') ? '<span style="background-color:#f88e02;font-weight:bold;">PENDENTE</span>' : 
-                  (graphic.attributes.ind_status === 'SU') ? '<span style="background-color:#fc0000;font-weight:bold;">SUSPENSO</span>' : 
-                  '<span style="background-color:#CCCCCC;font-weight:bold;">CANCELADO</span>'}
-              </p>
-            </div>
-            <hr>
+        const activeEvents = await fetchEvents();
+        // Criar área fixa para os atributos principais
+        let eventDetailsHTML = `
+          <div id="fixedAttributes">
+            <p><strong>GeoHash:</strong> ${graphic.attributes.globalid}</p>
+            <p><strong>Código do Imóvel:</strong> ${graphic.attributes.cod_imovel}</p>
+            <p><strong>Situação CAR:</strong> 
+                ${(graphic.attributes.ind_status === 'AT') ? '<span style="background-color:#0F0;font-weight:bold;">ATIVO</span>' : 
+                (graphic.attributes.ind_status === 'PE') ? '<span style="background-color:#f88e02;font-weight:bold;">PENDENTE</span>' : 
+                (graphic.attributes.ind_status === 'SU') ? '<span style="background-color:#fc0000;font-weight:bold;">SUSPENSO</span>' : 
+                '<span style="background-color:#CCCCCC;font-weight:bold;">CANCELADO</span>'}
+            </p>
+          </div>
+          <hr>
+        `;
+
+        if (activeEvents && activeEvents.length > 0) {
+          eventDetailsHTML += `
+            <div id="carouselContainer">
+              <button id="prevButton"> ◀ </button>
+              <div id="carousel">
           `;
-
-          if (activeEvents && activeEvents.length > 0) {
+          activeEvents.forEach(event => {
             eventDetailsHTML += `
-              <div id="carouselContainer">
-                <button id="prevButton"> ◀ </button>
-                <div id="carousel">
-            `;
-            activeEvents.forEach(event => {
-              eventDetailsHTML += `
-                  <div class="eventCard">
-                    <p><strong>Tipo de Evento:</strong> ${event.eventtype || '-'}</p>
-                    <p><strong>Data/Hora:</strong> ${new Date(event.timestamp * 1000).toLocaleString()}</p>
-                    <p><strong>Detalhes:</strong> ${event.details || '-'}</p>
-                    <p><strong>GeoHash:</strong> ${event.geohash || '-'}</p>
-                  </div>
-              `;
-              });
-            eventDetailsHTML += `
+                <div class="eventCard">
+                  <p><strong>Tipo de Evento:</strong> ${event.eventtype || '-'}</p>
+                  <p><strong>Data/Hora:</strong> ${new Date(event.timestamp * 1000).toLocaleString()}</p>
+                  <p><strong>Detalhes:</strong> ${event.details || '-'}</p>
+                  <p><strong>GeoHash:</strong> ${event.geohash || '-'}</p>
                 </div>
-                <button id="nextButton"> ▶ </button>
-              </div>
             `;
-          } else {
-            eventDetailsHTML += `
-              <div id="carouselContainer">
-                <button id="prevButton"></button>
-                <div id="carousel">
-                  <p>Nenhum evento encontrado.</p>
-                </div>
-                <button id="nextButton"></button>
+            });
+          eventDetailsHTML += `
               </div>
-            `;
-          }
+              <button id="nextButton"> ▶ </button>
+            </div>
+          `;
+        } else {
+          eventDetailsHTML += `
+            <div id="carouselContainer">
+              <button id="prevButton"></button>
+              <div id="carousel">
+                <p>Nenhum evento encontrado.</p>
+              </div>
+              <button id="nextButton"></button>
+            </div>
+          `;
+        }
 
-          document.getElementById("eventDetails").innerHTML = eventDetailsHTML;
+        document.getElementById("eventDetails").innerHTML = eventDetailsHTML;
 
-          // Adicionar funcionalidade de rolagem horizontal ao carrossel
-          const carousel = document.getElementById("carousel");
-          document.getElementById("prevButton").addEventListener("click", () => {
-              carousel.scrollBy({ left: -200, behavior: "smooth" });
-          });
-          document.getElementById("nextButton").addEventListener("click", () => {
-              carousel.scrollBy({ left: 200, behavior: "smooth" });
-          });
+        // Adicionar funcionalidade de rolagem horizontal ao carrossel
+        const carousel = document.getElementById("carousel");
+        document.getElementById("prevButton").addEventListener("click", () => {
+            carousel.scrollBy({ left: -200, behavior: "smooth" });
+        });
+        document.getElementById("nextButton").addEventListener("click", () => {
+            carousel.scrollBy({ left: 200, behavior: "smooth" });
         });
       }
     });
@@ -150,22 +149,20 @@ require([
   // Função para consumir a API REST do backend e atualizar a camada de eventos
   // Exemplo de chamada com fetch (ajuste conforme a necessidade):
   async function fetchEvents() {
-    if(activeGUID != -1) {
-      fetch(`http://localhost:5000/api/event/list/${activeGUID}`, { mode: 'no-cors' }).then(
-      (response) => {
-        activeEvents = response.json()
-        // Aqui você pode atualizar a camada ou criar gráficos dinâmicos com os dados recebidos.
+    try {
+      if(activeGUID != -1) {
+        const response = await fetch(`http://localhost:5000/api/event/list/${activeGUID}`, { mode: 'no-cors' })
+        if (!response.ok) {
+          throw new Error(`Erro ao buscar eventos: ${response.statusText}`);
+        }
+
+        activeEvents = await response.json()
         console.log("Eventos do lote:", activeEvents);
-      }).catch((error) => {
-        console.error("Erro ao buscar eventos:", error);
-      });
+
+        // Aqui você pode atualizar a camada ou criar gráficos dinâmicos com os dados recebidos.
+      }  
+    } catch (error) {
+      console.error("Erro ao buscar eventos:", error);
     }
   }
-
-  // Chamada inicial para atualizar os eventos imediatamente
-  // fetchEvents();
-
-  // Chamada periódica para atualizar os eventos
-  // setInterval(fetchEvents, 1 * 60 * 1000); // Atualiza a cada 60 segundos
-
 });
