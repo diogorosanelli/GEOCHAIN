@@ -42,7 +42,7 @@ contract GeoChainTracker {
         string memory details
     ) public {
         // Convert lotId from GUID to uint256
-        uint256 globalidUint = guidToUint256(globalid);
+        uint128 globalidUint = uint128(uint256(keccak256(abi.encodePacked(globalid))));
 
         // Cria o novo evento com o timestamp atual
         Event memory newEvent = Event({
@@ -66,21 +66,7 @@ contract GeoChainTracker {
      */
     function getEvents(string memory globalid) public view returns (Event[] memory) {
         // Convert lotId from GUID to uint256
-        uint256 globalidUint = guidToUint256(globalid);
+        uint128 globalidUint = uint128(uint256(keccak256(abi.encodePacked(globalid))));
         return geoEvents[globalidUint];
-    }
-
-    /**
-     * @notice Converts a GUID string to a uint256.
-     * @param guid The GUID string.
-     * @return The uint256 representation of the GUID.
-     */
-    function guidToUint256(string memory guid) internal pure returns (uint256) {
-        bytes memory b = bytes(guid);
-        uint256 number;
-        for (uint i = 0; i < b.length; i++) {
-            number = number * 16 + (uint8(b[i]) - (uint8(b[i]) > 57 ? 87 : 48));
-        }
-        return number;
     }
 }
