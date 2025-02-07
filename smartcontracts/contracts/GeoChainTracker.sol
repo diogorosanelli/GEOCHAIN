@@ -17,7 +17,7 @@ contract GeoChainTracker {
     } 
 
     // Mapeamento para associar um lote (globalid) a um array de eventos
-    mapping(uint256 => Event[]) private lotEvents;
+    mapping(uint256 => Event[]) private geoEvents;
 
     // Evento emitido quando um novo evento é registrado
     event EventRegistered(
@@ -53,7 +53,7 @@ contract GeoChainTracker {
         });
 
         // Adiciona o evento ao array correspondente ao lote
-        lotEvents[globalidUint].push(newEvent);
+        geoEvents[globalidUint].push(newEvent);
 
         // Emite o evento para registro na blockchain
         emit EventRegistered(globalidUint, block.timestamp, eventType, geoHash, details);
@@ -67,7 +67,7 @@ contract GeoChainTracker {
     function getEvents(string memory globalid) public view returns (Event[] memory) {
         // Convert lotId from GUID to uint256
         uint256 globalidUint = guidToUint256(globalid);
-        return lotEvents[globalidUint];
+        return geoEvents[globalidUint];
     }
 
     /**

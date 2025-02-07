@@ -11,8 +11,13 @@ require([
   "esri/widgets/LayerList"
 ], function(Map, MapView, TileLayer, FeatureLayer, Expand, Legend, LayerList) {
 
-  const activeGUID = -1; // OID do evento ativo (-1 para nenhum evento ativo)
+  let activeGUID = -1; // OID do evento ativo (-1 para nenhum evento ativo)
   const activeEvents = []; // Lista de eventos ativos
+
+  const carousel = document.getElementById('carousel');
+  const prevButton = document.getElementById('prevButton');
+  const nextButton = document.getElementById('nextButton');
+  const cardWidth = 200; // Largura do card + margem
 
   // Criação do mapa base
   const map = new Map({
@@ -76,16 +81,65 @@ require([
       if (results.length) {
         const graphic = results.filter(result => result.graphic.layer === lyrSJCImoveisCAR)[0].graphic;
         activeGUID = graphic.attributes.globalid;
-        // Exibir os detalhes do evento na sidebar
-        document.getElementById("eventDetails").innerHTML = `
-          <p><strong>Código do Imóvel:</strong> ${graphic.attributes.cod_imovel}</p>
-          <p><strong>Situação CAR:</strong> ${(graphic.attributes.ind_status === 'AT') ? '<span style="background-color:#0F0;font-weight:bold;">ATIVO</span>' : (graphic.attributes.ind_status === 'PE') ? '<span style="background-color:#f88e02;font-weight:bold;">PENDENTE</span>' : (graphic.attributes.ind_status === 'SU') ? '<span style="background-color:#fc0000;font-weight:bold;">SUSPENSO</span>' : '<span style="background-color:#CCCCCC;font-weight:bold;">CANCELADO</span>'}</p>
+        console.log("Imóvel Ativo Selecionado:", activeGUID);
+        
+        // Criar área fixa para os atributos principais
+        let eventDetailsHTML = `
+          <div id="fixedAttributes">
+            <p><strong>Código do Imóvel:</strong> ${graphic.attributes.cod_imovel}</p>
+            <p><strong>Situação CAR:</strong> 
+                ${(graphic.attributes.ind_status === 'AT') ? '<span style="background-color:#0F0;font-weight:bold;">ATIVO</span>' : 
+                (graphic.attributes.ind_status === 'PE') ? '<span style="background-color:#f88e02;font-weight:bold;">PENDENTE</span>' : 
+                (graphic.attributes.ind_status === 'SU') ? '<span style="background-color:#fc0000;font-weight:bold;">SUSPENSO</span>' : 
+                '<span style="background-color:#CCCCCC;font-weight:bold;">CANCELADO</span>'}
+            </p>
+          </div>
           <hr>
-          <p><strong>Tipo de Evento:</strong> ${(graphic.attributes.eventtype === undefined ? '-' : graphic.attributes.eventtype)}</p>
-          <p><strong>Data/Hora:</strong> ${new Date(graphic.attributes.timestamp * 1000).toLocaleString()}</p>
-          <p><strong>Detalhes:</strong> ${(graphic.attributes.details === undefined) ? '-' : graphic.attributes.details}</p>
-          <p><strong>GeoHash:</strong> ${(graphic.attributes.geohash === undefined) ? '-' : graphic.attributes.geohash}</p>
         `;
+
+        if (activeEvents && activeEvents.length > 0) {
+          eventDetailsHTML += `
+            <div id="carouselContainer">
+              <button id="prevButton"> ◀ </button>
+              <div id="carousel">
+          `;
+          activeEvents.forEach(event => {
+            eventDetailsHTML += `
+                <div class="eventCard">
+                  <p><strong>Tipo de Evento:</strong> ${event.eventtype || '-'}</p>
+                  <p><strong>Data/Hora:</strong> ${new Date(event.timestamp * 1000).toLocaleString()}</p>
+                  <p><strong>Detalhes:</strong> ${event.details || '-'}</p>
+                  <p><strong>GeoHash:</strong> ${event.geohash || '-'}</p>
+                </div>
+            `;
+            });
+          eventDetailsHTML += `
+              </div>
+              <button id="nextButton"> ▶ </button>
+            </div>
+          `;
+        } else {
+          eventDetailsHTML += `
+            <div id="carouselContainer">
+              <button id="prevButton"></button>
+              <div id="carousel">
+                <p>Nenhum evento encontrado.</p>
+              </div>
+              <button id="nextButton"></button>
+            </div>
+          `;
+        }
+
+        document.getElementById("eventDetails").innerHTML = eventDetailsHTML;
+
+        // Adicionar funcionalidade de rolagem horizontal ao carrossel
+        const carousel = document.getElementById("carousel");
+        document.getElementById("prevButton").addEventListener("click", () => {
+            carousel.scrollBy({ left: -200, behavior: "smooth" });
+        });
+        document.getElementById("nextButton").addEventListener("click", () => {
+            carousel.scrollBy({ left: 200, behavior: "smooth" });
+        });
       }
     });
   });
@@ -104,6 +158,6 @@ require([
   }
 
   // Chamada periódica para atualizar os eventos
-  setInterval(fetchEvents, 5 * 60 * 1000); // Atualiza a cada 60 segundos
+  setInterval(fetchEvents, 1 * 60 * 1000); // Atualiza a cada 60 segundos
 
 });

@@ -61,6 +61,41 @@ header {
   padding-bottom: 5px;
 }
 
+#carouselContainer {
+  display: flex;
+  align-items: center;
+}
+
+#carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.eventCard {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  margin-right: 10px;
+  /* Outros estilos para o card */
+}
+
+.button {
+  background-color: #007BFF; /* Cor de fundo principal */
+  color: #FFFFFF; /* Cor do texto */
+  font-family: "Roboto Condensed", serif; /* Tipografia */
+  font-size: 16px; /* Tamanho da fonte */
+  padding: 10px 20px; /* Espaçamento interno */
+  border: none; /* Remover borda padrão */
+  border-radius: 5px; /* Bordas arredondadas */
+  cursor: pointer; /* Cursor de ponteiro ao passar sobre o botão */
+  transition: background-color 0.3s ease; /* Transição suave para a cor de fundo */
+}
+
+.button:hover {
+  background-color: #0056b3; /* Cor de fundo ao passar o mouse */
+}
+
 /* Customização do título do popup */
 .esri-popup__title {
   background-color: #dce6dc !important; /* Altere para a cor desejada */

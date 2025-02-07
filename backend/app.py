@@ -43,11 +43,12 @@ def register_event():
     }
     return jsonify(response), 201
 
-@app.route('/api/event/list/<int:globalid>', methods=['GET'])
+@app.route('/api/event/list/<string:globalid>', methods=['GET'])
 def get_events(globalid):
     """
     Endpoint para obter os eventos registrados para um determinado lote.
     """
+    print("Obtendo eventos para o globalid:", globalid)
     events = get_events_from_blockchain(globalid)
     return jsonify(events), 200
 
