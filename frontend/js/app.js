@@ -17,6 +17,7 @@ require([
   esriConfig.request.corsEnabledServers.push("gisai.local");
   
   let activeGUID = -1; // OID do evento ativo (-1 para nenhum evento ativo)
+  let activeGraphic = undefined; // Gráfico do evento ativo
   let activeEvents = []; // Lista de eventos ativos
 
   const carousel = document.getElementById('carousel');
@@ -84,11 +85,17 @@ require([
     view.hitTest(event).then(async function(response) {
       const results = response.results;
       if (results.length) {
-        const graphic = results.filter(result => result.graphic.layer === lyrSJCImoveisCAR)[0].graphic;
-        activeGUID = graphic.attributes.globalid.replace("{", "").replace("}", "");
-        console.log("Imóvel Ativo Selecionado:", activeGUID);
-
-        constructEventDetails(graphic)
+        const filteredResults = results.filter(result => result.graphic.layer === lyrSJCImoveisCAR);
+        if (filteredResults.length > 0) {
+          const graphic = filteredResults[0].graphic;
+          activeGUID = graphic.attributes.globalid.replace("{", "").replace("}", "");
+          activeGraphic = graphic;
+          console.log("Imóvel Ativo Selecionado:", activeGUID);
+          constructEventDetails(graphic);
+        } else {
+          console.log("Nenhum imóvel selecionado.");
+          document.getElementById("eventDetails").innerHTML = "<p>Nenhum imóvel selecionado.</p>";
+        }
       }
     });
   });
@@ -183,5 +190,5 @@ require([
     }
   }
 
-  setInterval(constructEventDetails, 1 * 60 * 1000); // Atualiza a cada 1 minuto
+  setInterval(() => { if (activeGUID !== -1) constructEventDetails(activeGraphic); }, 1 * 60 * 1000); // Atualiza a cada 1 minuto
 });
