@@ -37,6 +37,9 @@ def load_contract(w3):
 
 def register_event_on_blockchain(globalid, event_type, geo_hash, details):
     try:
+        # Remover chaves e hífens da string globalid
+        globalid = globalid.replace("-", "").replace("{", "").replace("}", "")
+    
         w3 = initialize_web3()
         contract = load_contract(w3)
         account = ETH_ACCOUNT
@@ -82,6 +85,9 @@ def register_event_on_blockchain(globalid, event_type, geo_hash, details):
 
 def get_events_from_blockchain(globalid):
     try:
+        # Remover chaves e hífens da string globalid
+        globalid = globalid.replace("-", "").replace("{", "").replace("}", "")
+    
         w3 = initialize_web3()
         contract = load_contract(w3)
         events = contract.functions.getEvents(globalid).call()
@@ -102,5 +108,5 @@ def get_events_from_blockchain(globalid):
 # Exemplo de uso:
 if __name__ == "__main__":
     # Apenas para teste manual
-    result = register_event_on_blockchain(1, "plantio", "fakeGeoHash123", "Plantio realizado com sucesso.")
+    result = register_event_on_blockchain("90DB7D35-2008-46EB-AE2C-2F6319A9BDC6", "plantio", "fakeGeoHash123", "Plantio realizado com sucesso.")
     print(result)
