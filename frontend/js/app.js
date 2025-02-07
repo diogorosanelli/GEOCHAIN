@@ -2,6 +2,8 @@
 
 // Configuração do mapa utilizando o ArcGIS SDK for JavaScript
 require([
+  "esri/request",
+  "esri/config",
   "esri/Map",
   "esri/views/MapView",
   "esri/layers/TileLayer",
@@ -9,8 +11,11 @@ require([
   "esri/widgets/Expand",
   "esri/widgets/Legend",
   "esri/widgets/LayerList"
-], function(Map, MapView, TileLayer, FeatureLayer, Expand, Legend, LayerList) {
+], function(esriRequest, esriConfig, Map, MapView, TileLayer, FeatureLayer, Expand, Legend, LayerList) {
 
+  // Configuração do CORS para permitir requisições ao backend
+  esriConfig.request.corsEnabledServers.push("gisai.local");
+  
   let activeGUID = -1; // OID do evento ativo (-1 para nenhum evento ativo)
   let activeEvents = []; // Lista de eventos ativos
 
@@ -75,7 +80,7 @@ require([
   view.ui.add(tocExpand, "bottom-left");
 
   // Função para carregar detalhes do evento ao clicar em um marcador
-  view.on("click", function(event) {
+  view.on("click", async function(event) {
     view.hitTest(event).then(async function(response) {
       const results = response.results;
       if (results.length) {
@@ -83,86 +88,100 @@ require([
         activeGUID = graphic.attributes.globalid.replace("{", "").replace("}", "");
         console.log("Imóvel Ativo Selecionado:", activeGUID);
 
-        const activeEvents = await fetchEvents();
-        // Criar área fixa para os atributos principais
-        let eventDetailsHTML = `
-          <div id="fixedAttributes">
-            <p><strong>GeoHash:</strong> ${graphic.attributes.globalid}</p>
-            <p><strong>Código do Imóvel:</strong> ${graphic.attributes.cod_imovel}</p>
-            <p><strong>Situação CAR:</strong> 
-                ${(graphic.attributes.ind_status === 'AT') ? '<span style="background-color:#0F0;font-weight:bold;">ATIVO</span>' : 
-                (graphic.attributes.ind_status === 'PE') ? '<span style="background-color:#f88e02;font-weight:bold;">PENDENTE</span>' : 
-                (graphic.attributes.ind_status === 'SU') ? '<span style="background-color:#fc0000;font-weight:bold;">SUSPENSO</span>' : 
-                '<span style="background-color:#CCCCCC;font-weight:bold;">CANCELADO</span>'}
-            </p>
-          </div>
-          <hr>
-        `;
-
-        if (activeEvents && activeEvents.length > 0) {
-          eventDetailsHTML += `
-            <div id="carouselContainer">
-              <button id="prevButton"> ◀ </button>
-              <div id="carousel">
-          `;
-          activeEvents.forEach(event => {
-            eventDetailsHTML += `
-                <div class="eventCard">
-                  <p><strong>Tipo de Evento:</strong> ${event.eventtype || '-'}</p>
-                  <p><strong>Data/Hora:</strong> ${new Date(event.timestamp * 1000).toLocaleString()}</p>
-                  <p><strong>Detalhes:</strong> ${event.details || '-'}</p>
-                  <p><strong>GeoHash:</strong> ${event.geohash || '-'}</p>
-                </div>
-            `;
-            });
-          eventDetailsHTML += `
-              </div>
-              <button id="nextButton"> ▶ </button>
-            </div>
-          `;
-        } else {
-          eventDetailsHTML += `
-            <div id="carouselContainer">
-              <button id="prevButton"></button>
-              <div id="carousel">
-                <p>Nenhum evento encontrado.</p>
-              </div>
-              <button id="nextButton"></button>
-            </div>
-          `;
-        }
-
-        document.getElementById("eventDetails").innerHTML = eventDetailsHTML;
-
-        // Adicionar funcionalidade de rolagem horizontal ao carrossel
-        const carousel = document.getElementById("carousel");
-        document.getElementById("prevButton").addEventListener("click", () => {
-            carousel.scrollBy({ left: -200, behavior: "smooth" });
-        });
-        document.getElementById("nextButton").addEventListener("click", () => {
-            carousel.scrollBy({ left: 200, behavior: "smooth" });
-        });
+        constructEventDetails(graphic)
       }
     });
   });
 
+  async function constructEventDetails(graphic) {
+    // Criar área fixa para os atributos principais
+    let eventDetailsHTML = `
+      <div id="fixedAttributes">
+        <p><strong>GeoHash:</strong> ${graphic.attributes.globalid}</p>
+        <p><strong>Código do Imóvel:</strong> ${graphic.attributes.cod_imovel}</p>
+        <p><strong>Situação CAR:</strong> 
+            ${(graphic.attributes.ind_status === 'AT') ? '<span style="background-color:#0F0;font-weight:bold;">ATIVO</span>' : 
+            (graphic.attributes.ind_status === 'PE') ? '<span style="background-color:#f88e02;font-weight:bold;">PENDENTE</span>' : 
+            (graphic.attributes.ind_status === 'SU') ? '<span style="background-color:#fc0000;font-weight:bold;">SUSPENSO</span>' : 
+            '<span style="background-color:#CCCCCC;font-weight:bold;">CANCELADO</span>'}
+        </p>
+    `;
+
+    // Atualizar a camada de eventos com base no GUID do imóvel
+    activeEvents = await fetchEvents();        
+    if (activeEvents && activeEvents.length > 0) {
+      eventDetailsHTML += `
+          <p><strong>Nro. Eventos Registrados:</strong> ${activeEvents.length}</p>
+        </div>
+        <hr>
+        <div id="carouselContainer">
+          <button id="prevButton" class="navigationButtons"> ◀ </button>
+          <div id="carousel">
+      `;
+      activeEvents.forEach(event => {
+        eventDetailsHTML += `
+            <div class="eventCard">
+              <p><strong>Tipo de Evento:</strong> ${event.eventType || '-'}</p>
+              <p><strong>Data/Hora:</strong> ${new Date(event.timestamp * 1000).toLocaleString()}</p>
+              <p><strong>Detalhes:</strong> ${event.details || '-'}</p>
+              <p><strong>GeoHash:</strong> ${event.geoHash || '-'}</p>
+            </div>
+        `;
+        });
+      eventDetailsHTML += `
+          </div>
+          <button id="nextButton" class="navigationButtons"> ▶ </button>
+        </div>
+      `;
+    } else {
+      eventDetailsHTML += `
+          <p><strong>Nro. Eventos Registrados:</strong> 0</p>
+        </div>
+        <hr>
+        <div id="carouselContainer">
+          <div id="carousel">
+            <div class="eventCard" style="text-align:center;">
+              <p>Nenhum evento encontrado.</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    document.getElementById("eventDetails").innerHTML = eventDetailsHTML;
+
+    // Adicionar funcionalidade de rolagem horizontal ao carrossel
+    const carousel = document.getElementById("carousel");
+    if (activeEvents && activeEvents.length > 0) {
+      document.getElementById("prevButton").addEventListener("click", () => {
+          carousel.scrollBy({ left: -200, behavior: "smooth" });
+      });
+      document.getElementById("nextButton").addEventListener("click", () => {
+          carousel.scrollBy({ left: 200, behavior: "smooth" });
+      });
+    }
+  }
+
   // Função para consumir a API REST do backend e atualizar a camada de eventos
   // Exemplo de chamada com fetch (ajuste conforme a necessidade):
   async function fetchEvents() {
-    if(activeGUID != -1) {
-      fetch(`http://localhost:5000/api/event/list/${activeGUID}`, { mode: 'no-cors' })
-        .then(async response => {
-          if (!response.ok) {
-            throw new Error(`Erro ao buscar eventos: ${response.statusText}`);
-          }
-          activeEvents = await response.json()
-          console.log("Eventos do lote:", activeEvents);
-          // Aqui você pode atualizar a camada ou criar gráficos dinâmicos com os dados recebidos.
-          return activeEvents;
-        })
-        .catch(error => {
-          console.error("Erro ao buscar eventos:", error);
-        });
+    if(activeGUID==-1) return [];
+    try {
+      const response = await esriRequest(`http://gisai.local/geochain/api/event/list/${activeGUID}`, {
+        responseType: "json",
+        method: "get",
+        mode: "no-cors"
+      });
+      activeEvents = response.data
+      console.log("Eventos do lote:", activeEvents);
+      // Aqui você pode atualizar a camada ou criar gráficos dinâmicos com os dados recebidos.
+      return activeEvents;
+    } catch (error) {
+      console.error("Erro ao buscar eventos:", error);
+      return [];
+      // throw new Error("Erro ao buscar eventos: " + error.message);
     }
   }
+
+  setInterval(constructEventDetails, 1 * 60 * 1000); // Atualiza a cada 1 minuto
 });
